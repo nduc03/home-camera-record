@@ -1,0 +1,14 @@
+[Unit]
+Description=Run record.py with virtual environment and .env file
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=%s/venv/bin/python %s/record.py
+EnvironmentFile=%s/.env
+WorkingDirectory=%s
+Restart=always
+User=your_user  # Replace with the appropriate user
+
+[Install]
+WantedBy=multi-user.target
