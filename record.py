@@ -3,6 +3,7 @@ import os
 import time
 import threading
 import uuid
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlparse
@@ -32,7 +33,7 @@ class RTSPRecorder:
 
         :param rtsp_url: RTSP stream URL of the camera
         :param save_dir: Directory to store recorded files
-        :param max_storage: Maximum storage limit in GB before deleting old files
+        :param max_storage: Maximum storage limit in byte before deleting old files
         """
         self.rtsp_url = rtsp_url
         self.save_dir = Path(save_dir)
@@ -47,8 +48,8 @@ class RTSPRecorder:
         self.cleanup_thread = threading.Thread(target=self._delete_old_files, daemon=True)
         self.cleanup_thread.start()
 
-    #! bug Inconsistent calculation from different threads
-    def _get_seconds_until_next_split(self) -> int:
+    @staticmethod
+    def get_seconds_until_next_split() -> int:
         """
         Calculate the seconds remaining until the next split point (hourly or minutely).
         - If DEBUG is True → Split every minute
@@ -59,7 +60,10 @@ class RTSPRecorder:
             next_split = (now + timedelta(hours=1)).replace(minute=0, second=0, microsecond=0)
         else:
             next_split = (now + timedelta(minutes=1)).replace(second=0, microsecond=0)
-        return int((next_split - now).total_seconds())
+        result = int((next_split - now).total_seconds())
+        if result < 1:
+            return result + 60 if DEBUG else result + 3600
+        return result
 
     def _get_total_storage_used(self) -> float:
         """Get total storage used by video files in GB."""
@@ -77,11 +81,14 @@ class RTSPRecorder:
             time.sleep(60)  # Check storage every 60 seconds
 
     def record_stream(self):
-        """Continuously record the video and split files at each new hour/minute."""
+        """
+        Record the camera and split files at every new hour/minute.
+        The record will drop if connection is hang for more than 30 seconds.
+        """
         while True:
             # Get current timestamp and calculate duration until next split
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            duration = self._get_seconds_until_next_split()
+            duration = RTSPRecorder.get_seconds_until_next_split()
             filename = self.save_dir / f"{self.ip_addr}_{timestamp}.mp4"
 
             print(f"[INFO] Recording: {filename} (Duration: {duration} sec, DEBUG={DEBUG})")
@@ -90,30 +97,23 @@ class RTSPRecorder:
             try:
                 (
                     ffmpeg
-                    .input(self.rtsp_url, rtsp_transport="udp", hwaccel="auto")
+                    .input(self.rtsp_url, rtsp_transport="udp", hwaccel="auto", timeout="5000000")
                     .output(str(filename), vcodec="copy", acodec="aac", t=duration)
-                    .run(overwrite_output=True)
+                    .run(quiet=False, overwrite_output=True)
                 )
             except ffmpeg.Error as e:
                 print(f"[ERROR] FFmpeg Error: {e}")
 
 if __name__ == "__main__":
-    store_size = 20 * (1024 ** 2) if DEBUG else 10 * (1024 ** 3)
-    recorder1 = RTSPRecorder(
-        rtsp_url=os.getenv("RTSP_URL1"),
-        save_dir=f"./videos/{extract_ip(os.getenv("RTSP_URL1"))}",
+    argv = sys.argv[1:]
+    if len(argv) < 1:
+        print("Usage: python record.py <RTSP_URL>")
+        sys.exit(1)
+    argv_rtsp_url = argv[0]
+    store_size = 10 * (1024 ** 2) if DEBUG else 10 * (1024 ** 3)
+    recorder = RTSPRecorder(
+        rtsp_url=argv_rtsp_url,
+        save_dir=f"./videos/{extract_ip(argv_rtsp_url)}",
         max_storage_bytes=store_size
     )
-    recorder2 = RTSPRecorder(
-        rtsp_url=os.getenv("RTSP_URL2"),
-        save_dir=f"./videos/{extract_ip(os.getenv("RTSP_URL2"))}",
-        max_storage_bytes=store_size
-    )
-    record1_thread = threading.Thread(target=recorder1.record_stream)
-    record2_thread = threading.Thread(target=recorder2.record_stream)
-
-    record1_thread.start()
-    record2_thread.start()
-
-    record1_thread.join()
-    record2_thread.join()
+    recorder.record_stream()
