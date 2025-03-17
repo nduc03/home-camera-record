@@ -4,6 +4,7 @@ import time
 import threading
 import uuid
 import sys
+import logging
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlparse
@@ -14,6 +15,10 @@ try:
     DEBUG = True
 except ImportError:
     DEBUG = False
+
+console = logging.StreamHandler(sys.stdout)
+console.setLevel(logging.INFO)
+logging.getLogger().addHandler(console)
 
 def extract_ip(rtsp_url: str) -> str:
     """
@@ -89,8 +94,9 @@ class RTSPRecorder:
             # Get current timestamp and calculate duration until next split
             timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
             duration = RTSPRecorder.get_seconds_until_next_split()
-            filename = self.save_dir / f"{self.ip_addr}_{timestamp}.mp4"
+            filename = self.save_dir / f"{self.ip_addr}_{timestamp}_fragmented.mp4"
 
+            logging.info(f"[INFO] Recording: {filename} (Duration: {duration} sec, DEBUG={DEBUG})")
             print(f"[INFO] Recording: {filename} (Duration: {duration} sec, DEBUG={DEBUG})")
 
             # Use ffmpeg-python to start recording
@@ -98,10 +104,11 @@ class RTSPRecorder:
                 (
                     ffmpeg
                     .input(self.rtsp_url, rtsp_transport="udp", hwaccel="auto", timeout="30000000")
-                    .output(str(filename), vcodec="copy", acodec="aac", t=duration)
+                    .output(str(filename), vcodec="copy", acodec="aac", t=duration, movflags="frag_keyframe+empty_moov")
                     .run(quiet=True, overwrite_output=True)
                 )
             except ffmpeg.Error as e:
+                logging.error(f"[ERROR] FFmpeg Error: {e}")
                 print(f"[ERROR] FFmpeg Error: {e}")
 
 if __name__ == "__main__":
