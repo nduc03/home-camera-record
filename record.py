@@ -97,9 +97,9 @@ class RTSPRecorder:
             try:
                 (
                     ffmpeg
-                    .input(self.rtsp_url, rtsp_transport="udp", hwaccel="auto", timeout="5000000")
+                    .input(self.rtsp_url, rtsp_transport="udp", hwaccel="auto", timeout="30000000")
                     .output(str(filename), vcodec="copy", acodec="aac", t=duration)
-                    .run(quiet=False, overwrite_output=True)
+                    .run(quiet=True, overwrite_output=True)
                 )
             except ffmpeg.Error as e:
                 print(f"[ERROR] FFmpeg Error: {e}")

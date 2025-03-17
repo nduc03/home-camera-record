@@ -9,6 +9,9 @@ python3 -m venv venv_linux
 source venv_linux/bin/activate
 pip install -r requirements.txt
 
+# Add permissions to run.sh
+chmod +x run.sh
+
 # Install service
 ## Copy the service file template
 cp record-camera.service.template record-camera.service
