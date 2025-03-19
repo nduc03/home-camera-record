@@ -111,16 +111,42 @@ class RTSPRecorder:
                 logging.error(f"[ERROR] FFmpeg Error: {e}")
                 print(f"[ERROR] FFmpeg Error: {e}")
 
+def check_directory(path: str) -> bool, str:
+    """
+    Check if the directory exists and is writable.
+
+    :param path: The path to the directory
+    :return: True if the directory exists and is writable, False otherwise and also return reason
+    """
+    if not os.path.exists(path):
+        return False, f"[ERROR] Directory not found: {path}"
+    if not os.path.isdir(path):
+        return False, f"[ERROR] Not a directory: {path}"
+    if not os.access(path, os.W_OK):
+        return False, f"[ERROR] Directory is not writable: {path}"
+    return True, "Directory OK."
+
 if __name__ == "__main__":
     argv = sys.argv[1:]
-    if len(argv) < 1:
-        print("Usage: python record.py <RTSP_URL>")
+    if len(argv) < 2:
+        print("Usage: python record.py <RTSP_URL> <save_dir>")
         sys.exit(1)
     argv_rtsp_url = argv[0]
+    save_dir_str = argv[1]
+
+    # Check if the save directory is writable
+    is_writable, msg = check_directory(save_dir)
+    if not is_writable:
+        print(msg)
+        logging.error(msg)
+        sys.exit(1)
+
+    save_dir_path = Path(save_dir_str) / extract_ip(argv_rtsp_url)
+
     store_size = 10 * (1024 ** 2) if DEBUG else 10 * (1024 ** 3)
     recorder = RTSPRecorder(
         rtsp_url=argv_rtsp_url,
-        save_dir=f"./videos/{extract_ip(argv_rtsp_url)}",
+        save_dir=save_dir_path,
         max_storage_bytes=store_size
     )
     recorder.record_stream()
