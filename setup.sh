@@ -16,7 +16,7 @@ pip install -r requirements.txt
 chmod +x run.sh
 
 # Create a directory to store the camera records
-sudo mkdir /camera-records
+sudo mkdir -p /camera-records
 sudo chown $CURRENT_USER:$CURRENT_USER /camera-records
 chmod 700 /camera-records
 
