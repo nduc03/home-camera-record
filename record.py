@@ -1,3 +1,4 @@
+from typing import Tuple
 import ffmpeg
 import os
 import time
@@ -111,7 +112,7 @@ class RTSPRecorder:
                 logging.error(f"[ERROR] FFmpeg Error: {e}")
                 print(f"[ERROR] FFmpeg Error: {e}")
 
-def check_directory(path: str) -> bool, str:
+def check_directory(path: str) -> Tuple[bool, str]:
     """
     Check if the directory exists and is writable.
 
