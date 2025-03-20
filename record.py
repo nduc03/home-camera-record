@@ -136,7 +136,7 @@ if __name__ == "__main__":
     save_dir_str = argv[1]
 
     # Check if the save directory is writable
-    is_writable, msg = check_directory(save_dir)
+    is_writable, msg = check_directory(save_dir_str)
     if not is_writable:
         print(msg)
         logging.error(msg)
