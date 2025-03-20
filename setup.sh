@@ -1,5 +1,8 @@
 #!/bin/bash
 
+CURRENT_USER=$(whoami)
+CURRENT_DIR=$(pwd)
+
 # Install necessary packages
 sudo apt update
 sudo apt install -y python3 python3-pip python3-venv ffmpeg
@@ -12,13 +15,16 @@ pip install -r requirements.txt
 # Add permissions to run.sh
 chmod +x run.sh
 
+# Create a directory to store the camera records
+sudo mkdir /camera-records
+sudo chown $CURRENT_USER:$CURRENT_USER /camera-records
+chmod 700 /camera-records
+
 # Install service
 ## Copy the service file template
 cp record-camera.service.template record-camera.service
 ## Replaces variable in the service file
-CURRENT_DIR=$(pwd)
 sed -i "s|%s|$CURRENT_DIR|g" "record-camera.service"
-CURRENT_USER=$(whoami)
 sed -i "s|%u|$CURRENT_USER|g" "record-camera.service"
 ## Copy the service file to the systemd directory
 sudo mv record-camera.service /etc/systemd/system/
