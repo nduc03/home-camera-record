@@ -15,6 +15,9 @@ pip install -r requirements.txt
 # Add permissions to run.sh
 chmod +x run.sh
 
+# Copy configuration file template
+sudo cp conf.default /etc/camera-records.conf
+
 # Create a directory to store the camera records
 sudo mkdir -p /camera-records
 sudo chown $CURRENT_USER:$CURRENT_USER /camera-records

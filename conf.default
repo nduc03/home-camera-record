@@ -1,0 +1,3 @@
+[general]
+save_dir=/camera-records
+max_storage=10G

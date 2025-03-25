@@ -6,16 +6,14 @@ import threading
 import uuid
 import sys
 import logging
+import conf_reader
 from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlparse
 
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-    DEBUG = True
-except ImportError:
-    DEBUG = False
+DEBUG = os.getenv("DEBUG") == sys.platform.startswith("win")
+if DEBUG:
+    print("[INFO] Running in DEBUG mode.")
 
 console = logging.StreamHandler(sys.stdout)
 console.setLevel(logging.INFO)
@@ -129,11 +127,11 @@ def check_directory(path: str) -> Tuple[bool, str]:
 
 if __name__ == "__main__":
     argv = sys.argv[1:]
-    if len(argv) < 2:
-        print("Usage: python record.py <RTSP_URL> <save_dir>")
+    if len(argv) < 1:
+        print("Usage: python record.py <RTSP_URL>")
         sys.exit(1)
     argv_rtsp_url = argv[0]
-    save_dir_str = argv[1]
+    save_dir_str = conf_reader.SAVE_DIR
 
     # Check if the save directory is writable
     is_writable, msg = check_directory(save_dir_str)
@@ -144,7 +142,7 @@ if __name__ == "__main__":
 
     save_dir_path = Path(save_dir_str) / extract_ip(argv_rtsp_url)
 
-    store_size = 10 * (1024 ** 2) if DEBUG else 10 * (1024 ** 3)
+    store_size = conf_reader.MAX_STORAGE_BYTES
     recorder = RTSPRecorder(
         rtsp_url=argv_rtsp_url,
         save_dir=save_dir_path,
