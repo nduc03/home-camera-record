@@ -37,8 +37,8 @@ def check_file(path: str) -> Tuple[bool, str]:
         return False, f"[ERROR] File not found: {path}"
     if not os.path.isfile(path):
         return False, f"[ERROR] Not a file: {path}"
-    if not os.access(path, os.W_OK):
-        return False, f"[ERROR] File is not writable: {path}"
+    if not os.access(path, os.R_OK):
+        return False, f"[ERROR] File is not readable: {path}"
     return True, "File OK."
 
 if sys.platform.startswith("linux") and not os.path.exists(LINUX_CONF_PATH):
