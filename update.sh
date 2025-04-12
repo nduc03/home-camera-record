@@ -6,4 +6,5 @@ git pull origin main --force
 
 chmod +x run.sh setup.sh
 ./setup.sh
+sudo systemctl deamon-reload
 sudo systemctl restart record-camera.service

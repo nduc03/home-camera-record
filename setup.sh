@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CURRENT_USER=$(whoami)
+CURRENT_USER=$(logname)
 CURRENT_DIR=$(pwd)
 
 # Install necessary packages
@@ -12,8 +12,9 @@ python3 -m venv venv_linux
 source venv_linux/bin/activate
 pip install -r requirements.txt
 
-# Add permissions to run.sh
+# Add permissions to run.sh, update.sh
 chmod +x run.sh
+chmod +x update.sh
 
 # Copy configuration file template
 sudo cp camera-records.conf.default /etc/camera-records.conf
@@ -21,7 +22,15 @@ sudo cp camera-records.conf.default /etc/camera-records.conf
 # Create a directory to store the camera records
 sudo mkdir -p /camera-records
 sudo chown $CURRENT_USER:$CURRENT_USER /camera-records
-chmod 700 /camera-records
+sudo chmod 700 /camera-records
+
+# Create log files
+sudo touch /var/log/record-camera-output.log
+sudo chown $CURRENT_USER:$CURRENT_USER /var/log/record-camera-output.txt
+sudo chmod 644 /var/log/record-camera-output.log
+sudo touch /var/log/record-camera-error.log
+sudo chown $CURRENT_USER:$CURRENT_USER /var/log/record-camera-error.txt
+sudo chmod 644 /var/log/record-camera-error.log
 
 # Install service
 ## Copy the service file template
