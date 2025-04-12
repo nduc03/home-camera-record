@@ -9,8 +9,8 @@ EnvironmentFile=%s/.env
 WorkingDirectory=%s
 Restart=always
 User=%u
-StandardOutput=journal
-StandardError=journal
+StandardOutput=/var/log/record-camera-output.txt
+StandardError=/var/log/record-camera-error.txt
 
 [Install]
 WantedBy=multi-user.target

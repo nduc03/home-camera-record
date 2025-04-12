@@ -11,7 +11,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlparse
 
-DEBUG = os.getenv("DEBUG") == sys.platform.startswith("win")
+DEBUG =  sys.platform.startswith("win")
 if DEBUG:
     print("[INFO] Running in DEBUG mode.")
 

@@ -10,7 +10,7 @@ console.setLevel(logging.INFO)
 logging.getLogger().addHandler(console)
 
 LINUX_CONF_PATH = '/etc/camera-records.conf'
-WINDOWS_CONF_PATH = './camera-records.conf'
+WINDOWS_CONF_PATH = './camera-records-debug.conf'
 
 CONF_PATH = LINUX_CONF_PATH if sys.platform.startswith("linux") else WINDOWS_CONF_PATH
 
