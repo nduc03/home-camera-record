@@ -25,12 +25,12 @@ sudo chown $CURRENT_USER:$CURRENT_USER /camera-records
 sudo chmod 700 /camera-records
 
 # Create log files
-sudo touch /var/log/record-camera-output.log
+sudo touch /var/log/record-camera-output.txt
 sudo chown $CURRENT_USER:$CURRENT_USER /var/log/record-camera-output.txt
-sudo chmod 644 /var/log/record-camera-output.log
-sudo touch /var/log/record-camera-error.log
+sudo chmod 644 /var/log/record-camera-output.txt
+sudo touch /var/log/record-camera-error.txt
 sudo chown $CURRENT_USER:$CURRENT_USER /var/log/record-camera-error.txt
-sudo chmod 644 /var/log/record-camera-error.log
+sudo chmod 644 /var/log/record-camera-error.txt
 
 # Install service
 ## Copy the service file template
@@ -38,7 +38,7 @@ cp record-camera.service.template record-camera.service
 ## Replaces variable in the service file
 sed -i "s|%s|$CURRENT_DIR|g" "record-camera.service"
 sed -i "s|%u|$CURRENT_USER|g" "record-camera.service"
-## Copy the service file to the systemd directory
+## Move the service file to the systemd directory
 sudo mv record-camera.service /etc/systemd/system/
 ## Start the service
 sudo systemctl daemon-reload
