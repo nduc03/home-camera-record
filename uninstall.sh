@@ -8,4 +8,6 @@ sudo rm -f /etc/systemd/system/record-camera.service
 
 sudo rm -f /etc/camera-records.conf
 
-rm -rf .
+SCRIPT_DIR="$(dirname $(realpath $0))"
+
+rm -rf "$SCRIPT_DIR"
